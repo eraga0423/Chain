@@ -3,77 +3,36 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 )
 
-var (
-	w    = flag.Int("w", 100, "maximum number of words")
-	p    = flag.String("p", "lya lya", "Starting prefix")
-	l    = flag.Int("l", 2, "Prefix length")
-	help = flag.Bool("help", false, "show this screen")
-)
-
-func CreateMap() map[string][]string {
-	if len(strings.Split(*p, " ")) != *l {
-		fmt.Println("Flags do not match")
-		os.Exit(1)
-	}
-
-	data, err := io.ReadAll(os.Stdin)
-	// fmt.Println(string(content))
-	if err != nil {
-		fmt.Println("Error reading file", err)
-		os.Exit(1)
-	}
-	mapa := make(map[string][]string)
-	br := strings.Fields(string(data))
-	lens := (len(br) - *l) - 2
-
-	for i := 0; i <= lens+1; i++ {
-		pref := strings.Join(br[i:i+*l], " ")
-		mapa[pref] = append(mapa[pref], br[i+*l])
-	}
-	return mapa
-}
-
-func CreatorMarkovchain(mapa map[string][]string) []string {
-	count := *l
-	txt := []string{}
-	suffixes, _ := mapa[*p]
-	randomizer := 0
-	// (rand.Intn(len(suffixes)))
-	splittext := strings.Split(*p, " ")
-	txt = append(splittext[1:], suffixes[randomizer])
-	result := append(splittext, suffixes[randomizer])
-
-	for {
-		count++
-		if len(*p) >= *l {
-			result = result[:*l]
-			break
-		}
-		suffixes1, ok := mapa[strings.Join(txt, " ")]
-		if !ok || count == *w {
-			break
-		}
-		randomizer1 := 0
-		// (rand.Intn(len(suffixes1)))
-		txt = append(txt[1:], suffixes1[randomizer1])
-		result = append(result, txt[*l-1:]...)
-
-	}
-	return result
-}
+// The main function of the program, processing flags and executing core functions.
 
 func main() {
 	flag.Parse()
-	if len(os.Args) == 1 {
-		a := CreateMap()
-		fmt.Println(CreatorMarkovchain(a))
-
+	p := *p
+	l := *l
+	w := *w
+	if *help {
+		helpF()
 	}
 
-	// CreateMap()
+	if l < 0 || l > 5 {
+		fmt.Println("Error: length of prefix can be from 0 to 5")
+		os.Exit(1)
+	}
+	if w <= 0 || w > 10000 {
+		fmt.Println("Error: number of words must be in between 1 and 10000")
+		os.Exit(1)
+	}
+
+	if len(os.Args) == 0 || !Check() {
+		fmt.Println("Error: no input text")
+		os.Exit(1)
+	}
+	generalText := ReadFile()
+	createMap := CreateMap(generalText, l)
+	result := strings.Join(CreatorMarkovchain(createMap, generalText, p, l, w), " ")
+	fmt.Println(result)
 }
