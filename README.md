@@ -10,7 +10,7 @@
 ## Установка
 1. Скачайте или клонируйте репозиторий.
    ```bash
-   git clone https://github.com/eraga0423/Chain/tree/main
+   git clone https://github.com/eraga0423/Chain
    ```
 2. Убедитесь, что у вас установлен Go версии 1.18 или выше.
 
